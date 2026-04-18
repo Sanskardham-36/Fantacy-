@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantacy Tebal</title>
+    
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Fantacy%20Tebal%22,%22short_name%22:%22Fantacy%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%231e3a8a%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/5359/5359489.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
+    <meta name="theme-color" content="#1e3a8a">
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root { --primary: #1e3a8a; --green: #10b981; --red: #ef4444; }
+        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 10px; -webkit-tap-highlight-color: transparent; }
+        .app-card { max-width: 600px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: var(--primary); color: white; padding: 15px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th { background: #e5e7eb; padding: 10px; border: 1px solid #ccc; }
+        td { padding: 10px; border: 1px solid #eee; text-align: center; }
+        .status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; }
+        .dot-green { background: var(--green); box-shadow: 0 0 5px var(--green); }
+        .dot-red { background: var(--red); box-shadow: 0 0 5px var(--red); }
+        .btn-dep { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; }
+        .modal-content { background: white; width: 85%; max-width: 400px; margin: 80px auto; padding: 20px; border-radius: 15px; text-align: center; }
+        .admin-section { background: #fff1f2; padding: 15px; border-top: 2px solid var(--red); margin-top: 10px; }
+        .request-item { background: white; padding: 10px; margin: 8px 0; border-radius: 8px; border-left: 5px solid orange; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        footer { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); background: #eee; }
+        .install-btn { background: #000; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; display: none; }
+    </style>
+</head>
+<body>
+
+<button id="installApp" class="install-btn">📲 એપ ઇન્સ્ટોલ કરો</button>
+
+<div class="app-card">
+    <div class="header">
+        <h2>Fantacy Tebal</h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ક્રમ</th>
+                <th>નામ</th>
+                <th>ID</th>
+                <th>ડિપોઝિટ</th>
+                <th>સ્ટેટસ</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalName">ડિપોઝિટ ઓપ્શન</h3>
+            <button class="btn-dep" style="background:orange; width:100%; margin-bottom:10px;" onclick="showInput('cash')">Case (રોકડ)</button>
+            <button class="btn-dep" style="background:green; width:100%;" onclick="showInput('online')">Online (સ્કેનર)</button>
+            
+            <div id="inputArea" style="display:none; margin-top:15px; border-top: 1px solid #eee; padding-top:10px;">
+                <div id="qrImg" style="display:none;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=YOUR_UPI_ID" width="150"></div>
+                <input type="number" id="amtInput" placeholder="રકમ લખો">
+                <button class="btn-dep" id="submitBtn">રિક્વેસ્ટ મોકલો</button>
+            </div>
+            <br><br>
+            <button onclick="closeModal()">બંધ કરો</button>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <strong>🔒 એડમિન રિક્વેસ્ટ પેનલ</strong>
+        <div id="requestList"></div>
+        <hr>
+        <button onclick="setWinnerPrompt()" style="background:gold; border:none; padding:10px; width:100%; border-radius:5px; font-weight:bold; cursor:pointer;">🏆 વિનર એન્ટ્રી (Admin)</button>
+    </div>
+
+    <footer>Jatin Solanki By Version</footer>
+</div>
+
+<script>
+    // --- FIREBASE CONFIG (તમારા Firebase માંથી આ બદલો) ---
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentReqType = '';
+    let selectedPlayerId = null;
+
+    // --- REALTIME DATA LOAD ---
+    db.ref('players').on('value', (snapshot) => {
+        const data = snapshot.val();
+        let playerArray = data ? Object.values(data) : [];
+        renderTable(playerArray);
+    });
+
+    db.ref('requests').on('value', (snapshot) => {
+        const data = snapshot.val();
+        renderRequests(data);
+    });
+
+    function renderTable(players) {
+        players.sort((a, b) => b.deposit - a.deposit);
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        players.forEach((p, index) => {
+            let dot = p.deposit > 0 ? 'dot-green' : 'dot-red';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${p.name}</td>
+                    <td>${p.id}</td>
+                    <td><button class="btn-dep" onclick="openDepModal('${p.id}', '${p.name}')">₹${p.deposit}</button></td>
+                    <td><span class="status-dot ${dot}"></span></td>
+                </tr>
+            `;
+        });
+    }
+
+    function openDepModal(id, name) {
+        selectedPlayerId = id;
+        document.getElementById('modalName').innerText = name;
+        document.getElementById('depositModal').style.display = 'block';
+    }
+
+    function showInput(type) {
+        currentReqType = type;
+        document.getElementById('inputArea').style.display = 'block';
+        document.getElementById('qrImg').style.display = type === 'online' ? 'block' : 'none';
+        document.getElementById('submitBtn').onclick = () => {
+            let amt = document.getElementById('amtInput').value;
+            if(!amt) return alert("રકમ લખો");
+            db.ref('requests').push({
+                playerId: selectedPlayerId,
+                name: document.getElementById('modalName').innerText,
+                amount: parseInt(amt),
+                type: type
+            });
+            alert("રિક્વેસ્ટ મોકલાઈ ગઈ!");
+            closeModal();
+        };
+    }
+
+    function renderRequests(data) {
+        const reqDiv = document.getElementById('requestList');
+        reqDiv.innerHTML = '';
+        if(!data) { reqDiv.innerHTML = '<p>કોઈ રિક્વેસ્ટ નથી</p>'; return; }
+        
+        Object.keys(data).forEach(key => {
+            let r = data[key];
+            reqDiv.innerHTML += `
+                <div class="request-item">
+                    <span>${r.name}: ₹${r.amount} (${r.type})</span>
+                    <div>
+                        <button onclick="handleAdmin('${key}', 'approve')" style="background:green; color:white; border:none; padding:5px;">OK</button>
+                        <button onclick="handleAdmin('${key}', 'reject')" style="background:red; color:white; border:none; padding:5px;">X</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function handleAdmin(key, action) {
+        let p = prompt("Admin Pass:");
+        if(p !== "556644") return alert("ખોટો પાસવર્ડ");
+
+        if(action === 'approve') {
+            db.ref('requests/' + key).once('value', (snap) => {
+                let r = snap.val();
+                db.ref('players/' + r.playerId).child('deposit').transaction(current => (current || 0) + r.amount);
+                db.ref('requests/' + key).remove();
+            });
+        } else {
+            db.ref('requests/' + key).remove();
+        }
+    }
+
+    function setWinnerPrompt() {
+        let p = prompt("Admin Pass:");
+        if(p !== "556644") return;
+        let id = prompt("વિનર ID (દા.ત. FT001):");
+        let winAmt = prompt("જીતેલી રકમ:");
+        if(id && winAmt) {
+            db.ref('players/' + id).child('deposit').transaction(current => (current || 0) + parseInt(winAmt));
+        }
+    }
+
+    function closeModal() { 
+        document.getElementById('depositModal').style.display = 'none'; 
+        document.getElementById('inputArea').style.display = 'none';
+        document.getElementById('amtInput').value = '';
+    }
+
+    // --- PWA INSTALL LOGIC ---
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installApp').style.display = 'block';
+    });
+
+    document.getElementById('installApp').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') document.getElementById('installApp').style.display = 'none';
+            deferredPrompt = null;
+        }
+    });
+</script>
+</body>
+</html>
