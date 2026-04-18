@@ -2,269 +2,224 @@
 <html lang="gu">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fantacy Tebal - Jatin Solanki</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        /* Modern & Beautiful CSS */
-        :root { 
-            --primary: #1e3a8a; 
-            --accent: #d97706; 
-            --green: #10b981; 
-            --red: #ef4444; 
-            --bg: #f1f5f9; 
-        }
+        :root { --primary: #1e40af; --accent: #f59e0b; --bg: #f8fafc; }
+        body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        /* 1. Login Screen */
+        #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e40af, #3b82f6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         
-        .header { background: linear-gradient(135deg, var(--primary), #1d4ed8); color: white; padding: 25px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .header h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        .header small { font-size: 14px; opacity: 0.8; }
+        /* 2. Main App Content (Hidden initially) */
+        #appContent { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        .main-container { flex-grow: 1; max-width: 600px; margin: 20px auto; width: 95%; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .header { background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        .main-content { flex: 1; overflow-y: auto; padding: 15px; }
+        .card { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 12px; margin-bottom: 15px; }
 
-        /* Login Screen */
-        #loginScreen { text-align: center; padding: 50px 0; }
-        #loginScreen h2 { color: var(--primary); margin-bottom: 30px; }
-        .login-box { background: #fff; padding: 30px; border-radius: 15px; border: 1px solid #e2e8f0; }
+        /* Table Style */
+        table { width: 100%; border-collapse: collapse; }
+        th { color: #64748b; font-size: 11px; padding: 12px 5px; border-bottom: 2px solid #f1f5f9; text-transform: uppercase; }
+        td { padding: 15px 5px; text-align: center; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+        
+        .dep-btn { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        
+        /* Modal & UI Elements */
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; outline: none; font-size: 14px; }
+        .btn-action { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; background: #1e40af; color: white; font-size: 15px; }
+        
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
+        .modal-content { background:white; padding:20px; border-radius:24px; width:85%; max-width:340px; text-align:center; }
+        
+        .upi-box { background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #3b82f6; text-align: left; }
+        
+        /* Admin Section */
+        .admin-section { margin-top: 10px; border-top: 2px solid #eee; padding-top: 15px; }
+        .req-card { background:#f0f9ff; padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-left: 4px solid #3b82f6; }
 
-        /* Dashboard Screen */
-        #dashboardScreen { display: none; }
-        
-        /* Table Styling */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-radius: 10px; overflow: hidden; font-size: 15px; border: 1px solid #e2e8f0; }
-        th { background: #f8fafc; color: #475569; padding: 15px; border-bottom: 1px solid #e2e8f0; font-weight: 600; text-transform: uppercase; }
-        td { padding: 15px; text-align: center; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
-        tr:nth-child(even) { background-color: #f8fafc; }
-        tr:hover { background-color: #eff6ff; }
-        
-        .status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
-        .dot-green { background: var(--green); color: var(--green); }
-        .dot-red { background: var(--red); color: var(--red); }
-        
-        .deposit-amt { font-weight: bold; color: var(--primary); font-size: 16px; background: #dbeafe; padding: 6px 12px; border-radius: 6px; }
-
-        /* Admin Section & Buttons */
-        .admin-section { background-color: #fefce8; padding: 20px; border-radius: 15px; border: 2px dashed #f59e0b; margin-top: 20px; display: none; }
-        .admin-section h3 { margin-top: 0; color: #92400e; font-size: 18px; text-align: center; }
-        
-        input { width: 90%; padding: 12px; margin: 8px 0; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--primary); }
-        
-        .btn { border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; text-transform: uppercase; transition: 0.2s; color: white; margin: 5px; }
-        .btn:active { transform: scale(0.97); }
-        
-        .btn-primary { background: var(--primary); box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3); }
-        .btn-primary:hover { background: #1d4ed8; }
-        
-        .btn-accent { background: var(--accent); color: black; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); }
-        .btn-accent:hover { background: #f59e0b; }
-        
-        .btn-winner { background: linear-gradient(135deg, gold, #f59e0b); color: #1e293b; width: 100%; font-size: 16px; letter-spacing: 1px; }
-
-        /* Footer */
-        footer { text-align: center; padding: 25px; color: #475569; font-weight: 700; border-top: 1px solid #e2e8f0; background: white; margin-top: auto; font-size: 14px; }
-        footer span { color: var(--primary); }
+        footer { padding: 15px; text-align: center; font-size: 12px; color: #64748b; background: white; border-top: 1px solid #f1f5f9; }
+        footer b { color: #1e40af; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>Fantacy Tebal</h1>
-        <small>Real-time Ledger System</small>
+    <div id="loginPage">
+        <div class="login-card">
+            <h1 style="color: #1e40af; margin: 0 0 10px; font-size: 24px;">FANTACY TEBAL</h1>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Secure Admin Access</p>
+            <input type="password" id="loginPass" placeholder="પાસવર્ડ નાખો" style="text-align: center; font-size: 18px; letter-spacing: 5px;">
+            <button class="btn-action" onclick="checkLogin()">LOGIN</button>
+            <p style="font-size: 10px; color: #94a3b8; margin-top: 25px;">Developed By Jatin Solanki</p>
+        </div>
     </div>
 
-    <div class="main-container">
+    <div id="appContent">
+        <div class="header">
+            <h1>FANTACY TEBAL</h1>
+            <p>Real-time Ledger System</p>
+        </div>
 
-        <div id="loginScreen">
-            <h2>લોગિન કરો</h2>
-            <div class="login-box">
-                <p style="color: #64748b; margin-bottom: 20px;">જો તમે એડમિન હોવ તો પાસવર્ડ નાખો, અથવા સીધા ટેબલ જુઓ.</p>
-                <input type="password" id="loginPass" placeholder="પાસવર્ડ નાખો (556644)">
-                <br><br>
-                <button class="btn btn-primary" onclick="checkLogin()">Admin Login</button>
-                <br><br>
-                <button class="btn" style="background:#e2e8f0; color:#1e293b;" onclick="skipLogin()">ફક્ત ટેબલ જુઓ</button>
+        <div class="main-content">
+            <div class="card">
+                <h4 style="margin: 0 0 10px; font-size: 14px; text-align: center; color: #475569;">પ્લેયર્સ ડિપોઝિટ લિસ્ટ</h4>
+                <table>
+                    <thead>
+                        <tr><th>ક્રમ</th><th>પ્લેયર</th><th>ડિપોઝિટ</th></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 style="color: #1e40af; font-size: 16px; margin-top: 0;">🔒 એડમિન કંટ્રોલ</h3>
+                
+                <div id="reqList"></div>
+                
+                <hr style="border: 0.5px solid #eee; margin: 15px 0;">
+                
+                <input type="text" id="pName" placeholder="પ્લેયરનું આખું નામ">
+                <input type="text" id="pID" placeholder="પ્લેયર ID (Unique)">
+                <button class="btn-action" onclick="addPlayer()">પ્લેયર ઉમેરો</button>
+                
+                <button class="btn-action" style="background:#f59e0b; margin-top:10px;" onclick="setWinner()">🏆 વિનર એન્ટ્રી</button>
             </div>
         </div>
 
-        <div id="dashboardScreen">
-            <h3 style="text-align:center; color:#475569;">પ્લેયર્સ ડિપોઝિટ ટેબલ</h3>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>ક્રમ</th>
-                        <th>નામ</th>
-                        <th>ID</th>
-                        <th>ડિપોઝિટ</th>
-                        <th>સ્ટેટસ</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    </tbody>
-            </table>
-
-            <div id="adminSection" class="admin-section">
-                <h3>🔒 એડમિન કંટ્રોલ</h3>
-                <p style="font-size: 13px; color: #92400e; text-align: center;">નવો પ્લેયર ઉમેરવા માટે:</p>
-                <input type="text" id="pName" placeholder="પ્લેયરનું નામ">
-                <input type="text" id="pID" placeholder="પ્લેયર ID (દા.ત. 101, P1)">
-                <button class="btn btn-primary" style="width:100%" onclick="addPlayer()">પ્લેયર ઉમેરો</button>
-                
-                <hr style="margin: 20px 0; border: 0.5px solid #d9770633;">
-                
-                <button class="btn btn-winner" onclick="setWinner()">🏆 વિનર એન્ટ્રી / ડિપોઝિટ વધારો</button>
-            </div>
-            
-            <button class="btn" style="background:#eee; color:black; font-size:12px; margin-top:15px; width:100%; border-radius:5px" onclick="logout()">લોગઆઉટ / પ્લેયર મોડ</button>
-        </div>
-
+        <footer>Jatin Solanki <b>By Version</b></footer>
     </div>
 
-    <footer>Jatin Solanki <span>By Version</span></footer>
+    <div id="depModal" class="modal">
+        <div class="modal-content">
+            <h3 id="mPlayerName" style="color:#1e40af; margin-top:0;">ડિપોઝિટ</h3>
+            <p style="font-size:11px; color:gray; margin-bottom:15px;">નીચેની વિગત પર પેમેન્ટ મોકલીને રકમ લખો</p>
+            
+            <div class="upi-box">
+                <p style="margin:2px 0; font-weight:bold; font-size:14px; color:#1e293b;">Sakariya Vipul</p>
+                <p style="margin:2px 0; color:#2563eb; font-size:12px;"><b>UPI:</b> vipulsakariya989-4@oksbi</p>
+                <p style="margin:2px 0; color:#475569; font-size:12px;"><b>Mob:</b> +91 90239 65553</p>
+            </div>
+
+            <input type="number" id="amtInp" placeholder="રકમ લખો ₹" style="text-align: center; font-size: 18px; font-weight: bold;">
+            <button class="btn-action" onclick="sendReq()">પેમેન્ટની વિગત મોકલો</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:gray; margin-top:15px; font-size:13px; cursor: pointer;">રદ કરો</button>
+        </div>
+    </div>
 
 <script>
-    // Firebase Configuration (તમે સેટ કરેલી વિગતો)
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBfjRsS0vdY6slU3HxA3oj60Fz93VF0-74",
         authDomain: "fantacy-ea756.firebaseapp.com",
         projectId: "fantacy-ea756",
-        storageBucket: "fantacy-ea756.firebasestorage.app",
-        messagingSenderId: "1074108626187",
-        appId: "1:1074108626187:web:ab1c22b78ea4cb4f3f5e0e",
-        measurementId: "G-EKB18RQBMV",
         databaseURL: "https://fantacy-ea756-default-rtdb.firebaseio.com/"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    let curID = "";
 
-    const ADMIN_PASS = "556644";
-    let isAdmin = false;
-
-    // લોગિન ચેક કરવાનું ફંક્શન
+    // ૧. લોગિન પ્રોસેસ
     function checkLogin() {
         const pass = document.getElementById('loginPass').value;
-        if(pass === ADMIN_PASS) {
-            isAdmin = true;
-            showDashboard();
+        if(pass === "556644") {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('appContent').style.display = 'flex';
         } else {
-            alert("ખોટો પાસવર્ડ! (Hint: 556644)");
+            alert("ખોટો પાસવર્ડ! ફરી પ્રયાસ કરો.");
         }
     }
 
-    // લોગિન સ્કિપ કરવાનું ફંક્શન
-    function skipLogin() {
-        isAdmin = false;
-        showDashboard();
-    }
-    
-    // લોગઆઉટ ફંક્શન
-    function logout() {
-        document.getElementById('loginScreen').style.display = 'block';
-        document.getElementById('dashboardScreen').style.display = 'none';
-        document.getElementById('loginPass').value = '';
-    }
-
-    // ડેશબોર્ડ બતાવવાનું ફંક્શન
-    function showDashboard() {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('dashboardScreen').style.display = 'block';
-        
-        // જો એડમિન હોય તો જ એડમિન પેનલ બતાવવી
-        if(isAdmin) {
-            document.getElementById('adminSection').style.display = 'block';
-        } else {
-            document.getElementById('adminSection').style.display = 'none';
-        }
-    }
-
-    // പ્લેયર્સનું લિસ્ટ Real-time અપડેટ કરવું
-    db.ref('players').on('value', (snapshot) => {
-        const data = snapshot.val();
-        let playersArray = data ? Object.values(data) : [];
-        
-        // સોર્ટિંગ: જેની ડિપોઝિટ વધારે તે ઉપર
-        playersArray.sort((a, b) => b.deposit - a.deposit);
-        
+    // ૨. પ્લેયર્સ ડેટા લોડ કરવો (Real-time)
+    db.ref('players').on('value', (snap) => {
+        const data = snap.val();
+        let arr = data ? Object.values(data) : [];
+        arr.sort((a, b) => b.deposit - a.deposit);
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
-        
-        if (playersArray.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5">કોઈ પ્લેયર નથી. એડમિન મોડમાં ઉમેરો.</td></tr>`;
-            return;
-        }
-
-        playersArray.forEach((p, index) => {
-            let dotClass = p.deposit > 0 ? 'dot-green' : 'dot-red';
-            tbody.innerHTML += `
-                <tr>
-                    <td style="font-weight:bold">${index + 1}</td>
-                    <td>${p.name}</td>
-                    <td><small style="color:#64748b">${p.id}</small></td>
-                    <td><span class="deposit-amt">₹${p.deposit}</span></td>
-                    <td><span class="status-dot ${dotClass}"></span></td>
-                </tr>
-            `;
+        arr.forEach((p, index) => {
+            tbody.innerHTML += `<tr>
+                <td>${index + 1}</td>
+                <td style="text-align:left; padding-left:10px;"><b>${p.name}</b><br><small style="color:gray;">ID: ${p.id}</small></td>
+                <td><button class="dep-btn" onclick="openDep('${p.id}', '${p.name}')">₹${p.deposit}</button></td>
+            </tr>`;
         });
     });
 
-    // નવો પ્લેયર ઉમેરવાનું ફંક્શન (ફક્ત એડમિન માટે)
-    function addPlayer() {
-        if(!isAdmin) return;
-        
-        const name = document.getElementById('pName').value.trim();
-        const id = document.getElementById('pID').value.trim();
-        
-        if(!name || !id) return alert("નામ અને ID બંને લખો");
-        
-        // ID યુનિક હોવું જોઈએ એટલે ચેક કરવું
-        db.ref('players/' + id).once('value', (snap) => {
-            if(snap.exists()) {
-                alert("આ ID પહેલાથી વપરાયેલું છે. નવું ID આપો.");
-            } else {
-                db.ref('players/' + id).set({
-                    id: id,
-                    name: name,
-                    deposit: 0
-                }).then(() => {
-                    alert(name + " ઉમેરાઈ ગયો!");
-                    document.getElementById('pName').value = '';
-                    document.getElementById('pID').value = '';
-                });
-            }
-        });
+    // ૩. પેમેન્ટ રિક્વેસ્ટ (એડમિન માટે)
+    db.ref('requests').on('value', (snap) => {
+        const div = document.getElementById('reqList');
+        div.innerHTML = '';
+        const data = snap.val();
+        if(!data) {
+            div.innerHTML = '<p style="font-size:12px; color:gray; text-align:center;">કોઈ નવી રિક્વેસ્ટ નથી.</p>';
+        } else {
+            Object.keys(data).forEach(k => {
+                let r = data[k];
+                div.innerHTML += `<div class="req-card">
+                    <span style="font-size:13px; color:#1e3a8a;"><b>${r.name}</b>: ₹${r.amount}</span>
+                    <button onclick="approve('${k}', '${r.pId}', ${r.amount})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">OK</button>
+                </div>`;
+            });
+        }
+    });
+
+    // ૪. ડિપોઝિટ અને મોડલ ફંક્શન
+    function openDep(id, name) {
+        curID = id;
+        document.getElementById('mPlayerName').innerText = name;
+        document.getElementById('depModal').style.display = 'flex';
+        document.getElementById('amtInp').value = '';
     }
 
-    // વિનર અથવા ડિપોઝિટ અપડેટ કરવાનું ફંક્શન (ફક્ત એડમિન માટે)
-    function setWinner() {
-        if(!isAdmin) return;
-        
-        const id = prompt("Winner ID નાખો:");
-        if(!id) return;
-        
-        const amount = prompt("જીતેલી રકમ નાખો (₹):");
-        if(!amount || isNaN(amount)) return alert("સાચી રકમ લખો");
+    function closeModal() { document.getElementById('depModal').style.display = 'none'; }
 
-        db.ref('players/' + id).once('value', (snap) => {
-            if(snap.exists()) {
-                let currentDeposit = snap.val().deposit || 0;
-                db.ref('players/' + id).update({
-                    deposit: currentDeposit + parseInt(amount)
-                }).then(() => {
-                    alert("જીત એડ થઈ ગઈ!");
-                });
-            } else {
-                alert("આ ID વાળો કોઈ પ્લેયર નથી.");
-            }
+    function sendReq() {
+        let val = document.getElementById('amtInp').value;
+        if(!val || val <= 0) { alert("રકમ લખો"); return; }
+        
+        db.ref('requests').push({
+            pId: curID,
+            name: document.getElementById('mPlayerName').innerText,
+            amount: parseInt(val)
         });
+        
+        alert("રિક્વેસ્ટ મોકલાઈ ગઈ! એડમિન પેમેન્ટ ચેક કરીને જમા કરી દેશે.");
+        closeModal();
+    }
+
+    function approve(key, id, amt) {
+        db.ref('players/' + id).child('deposit').transaction(c => (c || 0) + amt);
+        db.ref('requests/' + key).remove();
+    }
+
+    // ૫. એડમિન ઓપરેશન્સ
+    function addPlayer() {
+        let n = document.getElementById('pName').value;
+        let i = document.getElementById('pID').value;
+        if(n && i) {
+            db.ref('players/' + i).set({ name: n, id: i, deposit: 0 });
+            document.getElementById('pName').value = '';
+            document.getElementById('pID').value = '';
+            alert("પ્લેયર ઉમેરાઈ ગયો.");
+        } else {
+            alert("નામ અને ID બંને લખો.");
+        }
+    }
+
+    function setWinner() {
+        let i = prompt("વિનર પ્લેયરનું ID નાખો:");
+        let a = prompt("જીતેલી રકમ નાખો (₹):");
+        if(i && a) {
+            db.ref('players/' + i).child('deposit').transaction(c => (c || 0) + parseInt(a));
+            alert("રકમ જમા થઈ ગઈ.");
+        }
     }
 </script>
-
 </body>
 </html>
