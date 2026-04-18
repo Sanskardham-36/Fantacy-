@@ -3,215 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fantacy Tebal</title>
+    <title>Fantacy Tebal - Jatin Solanki</title>
     
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Fantacy%20Tebal%22,%22short_name%22:%22Fantacy%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23ffffff%22,%22theme_color%22:%22%231e3a8a%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/5359/5359489.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22}]}">
-    <meta name="theme-color" content="#1e3a8a">
-
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #1e3a8a; --green: #10b981; --red: #ef4444; }
-        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 10px; -webkit-tap-highlight-color: transparent; }
-        .app-card { max-width: 600px; margin: auto; background: white; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { background: var(--primary); color: white; padding: 15px; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th { background: #e5e7eb; padding: 10px; border: 1px solid #ccc; }
-        td { padding: 10px; border: 1px solid #eee; text-align: center; }
-        .status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; }
-        .dot-green { background: var(--green); box-shadow: 0 0 5px var(--green); }
-        .dot-red { background: var(--red); box-shadow: 0 0 5px var(--red); }
-        .btn-dep { background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; }
-        .modal-content { background: white; width: 85%; max-width: 400px; margin: 80px auto; padding: 20px; border-radius: 15px; text-align: center; }
-        .admin-section { background: #fff1f2; padding: 15px; border-top: 2px solid var(--red); margin-top: 10px; }
-        .request-item { background: white; padding: 10px; margin: 8px 0; border-radius: 8px; border-left: 5px solid orange; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
-        footer { text-align: center; padding: 20px; font-weight: bold; color: var(--primary); background: #eee; }
-        .install-btn { background: #000; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; display: none; }
+        /* Modern & Beautiful CSS */
+        :root { 
+            --primary: #1e3a8a; 
+            --accent: #d97706; 
+            --green: #10b981; 
+            --red: #ef4444; 
+            --bg: #f1f5f9; 
+        }
+        
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        .header { background: linear-gradient(135deg, var(--primary), #1d4ed8); color: white; padding: 25px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+        .header small { font-size: 14px; opacity: 0.8; }
+        
+        .main-container { flex-grow: 1; max-width: 600px; margin: 20px auto; width: 95%; background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+
+        /* Login Screen */
+        #loginScreen { text-align: center; padding: 50px 0; }
+        #loginScreen h2 { color: var(--primary); margin-bottom: 30px; }
+        .login-box { background: #fff; padding: 30px; border-radius: 15px; border: 1px solid #e2e8f0; }
+
+        /* Dashboard Screen */
+        #dashboardScreen { display: none; }
+        
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; border-radius: 10px; overflow: hidden; font-size: 15px; border: 1px solid #e2e8f0; }
+        th { background: #f8fafc; color: #475569; padding: 15px; border-bottom: 1px solid #e2e8f0; font-weight: 600; text-transform: uppercase; }
+        td { padding: 15px; text-align: center; border-bottom: 1px solid #f1f5f9; color: #1e293b; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        tr:hover { background-color: #eff6ff; }
+        
+        .status-dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px currentColor; }
+        .dot-green { background: var(--green); color: var(--green); }
+        .dot-red { background: var(--red); color: var(--red); }
+        
+        .deposit-amt { font-weight: bold; color: var(--primary); font-size: 16px; background: #dbeafe; padding: 6px 12px; border-radius: 6px; }
+
+        /* Admin Section & Buttons */
+        .admin-section { background-color: #fefce8; padding: 20px; border-radius: 15px; border: 2px dashed #f59e0b; margin-top: 20px; display: none; }
+        .admin-section h3 { margin-top: 0; color: #92400e; font-size: 18px; text-align: center; }
+        
+        input { width: 90%; padding: 12px; margin: 8px 0; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); }
+        
+        .btn { border: none; padding: 12px 24px; border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 600; text-transform: uppercase; transition: 0.2s; color: white; margin: 5px; }
+        .btn:active { transform: scale(0.97); }
+        
+        .btn-primary { background: var(--primary); box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3); }
+        .btn-primary:hover { background: #1d4ed8; }
+        
+        .btn-accent { background: var(--accent); color: black; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3); }
+        .btn-accent:hover { background: #f59e0b; }
+        
+        .btn-winner { background: linear-gradient(135deg, gold, #f59e0b); color: #1e293b; width: 100%; font-size: 16px; letter-spacing: 1px; }
+
+        /* Footer */
+        footer { text-align: center; padding: 25px; color: #475569; font-weight: 700; border-top: 1px solid #e2e8f0; background: white; margin-top: auto; font-size: 14px; }
+        footer span { color: var(--primary); }
     </style>
 </head>
 <body>
 
-<button id="installApp" class="install-btn">📲 એપ ઇન્સ્ટોલ કરો</button>
-
-<div class="app-card">
     <div class="header">
-        <h2>Fantacy Tebal</h2>
+        <h1>Fantacy Tebal</h1>
+        <small>Real-time Ledger System</small>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>ક્રમ</th>
-                <th>નામ</th>
-                <th>ID</th>
-                <th>ડિપોઝિટ</th>
-                <th>સ્ટેટસ</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+    <div class="main-container">
 
-    <div id="depositModal" class="modal">
-        <div class="modal-content">
-            <h3 id="modalName">ડિપોઝિટ ઓપ્શન</h3>
-            <button class="btn-dep" style="background:orange; width:100%; margin-bottom:10px;" onclick="showInput('cash')">Case (રોકડ)</button>
-            <button class="btn-dep" style="background:green; width:100%;" onclick="showInput('online')">Online (સ્કેનર)</button>
-            
-            <div id="inputArea" style="display:none; margin-top:15px; border-top: 1px solid #eee; padding-top:10px;">
-                <div id="qrImg" style="display:none;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=YOUR_UPI_ID" width="150"></div>
-                <input type="number" id="amtInput" placeholder="રકમ લખો">
-                <button class="btn-dep" id="submitBtn">રિક્વેસ્ટ મોકલો</button>
+        <div id="loginScreen">
+            <h2>લોગિન કરો</h2>
+            <div class="login-box">
+                <p style="color: #64748b; margin-bottom: 20px;">જો તમે એડમિન હોવ તો પાસવર્ડ નાખો, અથવા સીધા ટેબલ જુઓ.</p>
+                <input type="password" id="loginPass" placeholder="પાસવર્ડ નાખો (556644)">
+                <br><br>
+                <button class="btn btn-primary" onclick="checkLogin()">Admin Login</button>
+                <br><br>
+                <button class="btn" style="background:#e2e8f0; color:#1e293b;" onclick="skipLogin()">ફક્ત ટેબલ જુઓ</button>
             </div>
-            <br><br>
-            <button onclick="closeModal()">બંધ કરો</button>
         </div>
+
+        <div id="dashboardScreen">
+            <h3 style="text-align:center; color:#475569;">પ્લેયર્સ ડિપોઝિટ ટેબલ</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>ક્રમ</th>
+                        <th>નામ</th>
+                        <th>ID</th>
+                        <th>ડિપોઝિટ</th>
+                        <th>સ્ટેટસ</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    </tbody>
+            </table>
+
+            <div id="adminSection" class="admin-section">
+                <h3>🔒 એડમિન કંટ્રોલ</h3>
+                <p style="font-size: 13px; color: #92400e; text-align: center;">નવો પ્લેયર ઉમેરવા માટે:</p>
+                <input type="text" id="pName" placeholder="પ્લેયરનું નામ">
+                <input type="text" id="pID" placeholder="પ્લેયર ID (દા.ત. 101, P1)">
+                <button class="btn btn-primary" style="width:100%" onclick="addPlayer()">પ્લેયર ઉમેરો</button>
+                
+                <hr style="margin: 20px 0; border: 0.5px solid #d9770633;">
+                
+                <button class="btn btn-winner" onclick="setWinner()">🏆 વિનર એન્ટ્રી / ડિપોઝિટ વધારો</button>
+            </div>
+            
+            <button class="btn" style="background:#eee; color:black; font-size:12px; margin-top:15px; width:100%; border-radius:5px" onclick="logout()">લોગઆઉટ / પ્લેયર મોડ</button>
+        </div>
+
     </div>
 
-    <div class="admin-section">
-        <strong>🔒 એડમિન રિક્વેસ્ટ પેનલ</strong>
-        <div id="requestList"></div>
-        <hr>
-        <button onclick="setWinnerPrompt()" style="background:gold; border:none; padding:10px; width:100%; border-radius:5px; font-weight:bold; cursor:pointer;">🏆 વિનર એન્ટ્રી (Admin)</button>
-    </div>
-
-    <footer>Jatin Solanki By Version</footer>
-</div>
+    <footer>Jatin Solanki <span>By Version</span></footer>
 
 <script>
-    // --- FIREBASE CONFIG (તમારા Firebase માંથી આ બદલો) ---
+    // Firebase Configuration (તમે સેટ કરેલી વિગતો)
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        databaseURL: "YOUR_DATABASE_URL",
-        projectId: "YOUR_PROJECT_ID",
+        apiKey: "AIzaSyBfjRsS0vdY6slU3HxA3oj60Fz93VF0-74",
+        authDomain: "fantacy-ea756.firebaseapp.com",
+        projectId: "fantacy-ea756",
+        storageBucket: "fantacy-ea756.firebasestorage.app",
+        messagingSenderId: "1074108626187",
+        appId: "1:1074108626187:web:ab1c22b78ea4cb4f3f5e0e",
+        measurementId: "G-EKB18RQBMV",
+        databaseURL: "https://fantacy-ea756-default-rtdb.firebaseio.com/"
     };
+
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let currentReqType = '';
-    let selectedPlayerId = null;
+    const ADMIN_PASS = "556644";
+    let isAdmin = false;
 
-    // --- REALTIME DATA LOAD ---
+    // લોગિન ચેક કરવાનું ફંક્શન
+    function checkLogin() {
+        const pass = document.getElementById('loginPass').value;
+        if(pass === ADMIN_PASS) {
+            isAdmin = true;
+            showDashboard();
+        } else {
+            alert("ખોટો પાસવર્ડ! (Hint: 556644)");
+        }
+    }
+
+    // લોગિન સ્કિપ કરવાનું ફંક્શન
+    function skipLogin() {
+        isAdmin = false;
+        showDashboard();
+    }
+    
+    // લોગઆઉટ ફંક્શન
+    function logout() {
+        document.getElementById('loginScreen').style.display = 'block';
+        document.getElementById('dashboardScreen').style.display = 'none';
+        document.getElementById('loginPass').value = '';
+    }
+
+    // ડેશબોર્ડ બતાવવાનું ફંક્શન
+    function showDashboard() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardScreen').style.display = 'block';
+        
+        // જો એડમિન હોય તો જ એડમિન પેનલ બતાવવી
+        if(isAdmin) {
+            document.getElementById('adminSection').style.display = 'block';
+        } else {
+            document.getElementById('adminSection').style.display = 'none';
+        }
+    }
+
+    // പ્લેયર્સનું લિસ્ટ Real-time અપડેટ કરવું
     db.ref('players').on('value', (snapshot) => {
         const data = snapshot.val();
-        let playerArray = data ? Object.values(data) : [];
-        renderTable(playerArray);
-    });
-
-    db.ref('requests').on('value', (snapshot) => {
-        const data = snapshot.val();
-        renderRequests(data);
-    });
-
-    function renderTable(players) {
-        players.sort((a, b) => b.deposit - a.deposit);
+        let playersArray = data ? Object.values(data) : [];
+        
+        // સોર્ટિંગ: જેની ડિપોઝિટ વધારે તે ઉપર
+        playersArray.sort((a, b) => b.deposit - a.deposit);
+        
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
-        players.forEach((p, index) => {
-            let dot = p.deposit > 0 ? 'dot-green' : 'dot-red';
+        
+        if (playersArray.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">કોઈ પ્લેયર નથી. એડમિન મોડમાં ઉમેરો.</td></tr>`;
+            return;
+        }
+
+        playersArray.forEach((p, index) => {
+            let dotClass = p.deposit > 0 ? 'dot-green' : 'dot-red';
             tbody.innerHTML += `
                 <tr>
-                    <td>${index + 1}</td>
+                    <td style="font-weight:bold">${index + 1}</td>
                     <td>${p.name}</td>
-                    <td>${p.id}</td>
-                    <td><button class="btn-dep" onclick="openDepModal('${p.id}', '${p.name}')">₹${p.deposit}</button></td>
-                    <td><span class="status-dot ${dot}"></span></td>
+                    <td><small style="color:#64748b">${p.id}</small></td>
+                    <td><span class="deposit-amt">₹${p.deposit}</span></td>
+                    <td><span class="status-dot ${dotClass}"></span></td>
                 </tr>
             `;
         });
-    }
+    });
 
-    function openDepModal(id, name) {
-        selectedPlayerId = id;
-        document.getElementById('modalName').innerText = name;
-        document.getElementById('depositModal').style.display = 'block';
-    }
-
-    function showInput(type) {
-        currentReqType = type;
-        document.getElementById('inputArea').style.display = 'block';
-        document.getElementById('qrImg').style.display = type === 'online' ? 'block' : 'none';
-        document.getElementById('submitBtn').onclick = () => {
-            let amt = document.getElementById('amtInput').value;
-            if(!amt) return alert("રકમ લખો");
-            db.ref('requests').push({
-                playerId: selectedPlayerId,
-                name: document.getElementById('modalName').innerText,
-                amount: parseInt(amt),
-                type: type
-            });
-            alert("રિક્વેસ્ટ મોકલાઈ ગઈ!");
-            closeModal();
-        };
-    }
-
-    function renderRequests(data) {
-        const reqDiv = document.getElementById('requestList');
-        reqDiv.innerHTML = '';
-        if(!data) { reqDiv.innerHTML = '<p>કોઈ રિક્વેસ્ટ નથી</p>'; return; }
+    // નવો પ્લેયર ઉમેરવાનું ફંક્શન (ફક્ત એડમિન માટે)
+    function addPlayer() {
+        if(!isAdmin) return;
         
-        Object.keys(data).forEach(key => {
-            let r = data[key];
-            reqDiv.innerHTML += `
-                <div class="request-item">
-                    <span>${r.name}: ₹${r.amount} (${r.type})</span>
-                    <div>
-                        <button onclick="handleAdmin('${key}', 'approve')" style="background:green; color:white; border:none; padding:5px;">OK</button>
-                        <button onclick="handleAdmin('${key}', 'reject')" style="background:red; color:white; border:none; padding:5px;">X</button>
-                    </div>
-                </div>`;
+        const name = document.getElementById('pName').value.trim();
+        const id = document.getElementById('pID').value.trim();
+        
+        if(!name || !id) return alert("નામ અને ID બંને લખો");
+        
+        // ID યુનિક હોવું જોઈએ એટલે ચેક કરવું
+        db.ref('players/' + id).once('value', (snap) => {
+            if(snap.exists()) {
+                alert("આ ID પહેલાથી વપરાયેલું છે. નવું ID આપો.");
+            } else {
+                db.ref('players/' + id).set({
+                    id: id,
+                    name: name,
+                    deposit: 0
+                }).then(() => {
+                    alert(name + " ઉમેરાઈ ગયો!");
+                    document.getElementById('pName').value = '';
+                    document.getElementById('pID').value = '';
+                });
+            }
         });
     }
 
-    function handleAdmin(key, action) {
-        let p = prompt("Admin Pass:");
-        if(p !== "556644") return alert("ખોટો પાસવર્ડ");
+    // વિનર અથવા ડિપોઝિટ અપડેટ કરવાનું ફંક્શન (ફક્ત એડમિન માટે)
+    function setWinner() {
+        if(!isAdmin) return;
+        
+        const id = prompt("Winner ID નાખો:");
+        if(!id) return;
+        
+        const amount = prompt("જીતેલી રકમ નાખો (₹):");
+        if(!amount || isNaN(amount)) return alert("સાચી રકમ લખો");
 
-        if(action === 'approve') {
-            db.ref('requests/' + key).once('value', (snap) => {
-                let r = snap.val();
-                db.ref('players/' + r.playerId).child('deposit').transaction(current => (current || 0) + r.amount);
-                db.ref('requests/' + key).remove();
-            });
-        } else {
-            db.ref('requests/' + key).remove();
-        }
+        db.ref('players/' + id).once('value', (snap) => {
+            if(snap.exists()) {
+                let currentDeposit = snap.val().deposit || 0;
+                db.ref('players/' + id).update({
+                    deposit: currentDeposit + parseInt(amount)
+                }).then(() => {
+                    alert("જીત એડ થઈ ગઈ!");
+                });
+            } else {
+                alert("આ ID વાળો કોઈ પ્લેયર નથી.");
+            }
+        });
     }
-
-    function setWinnerPrompt() {
-        let p = prompt("Admin Pass:");
-        if(p !== "556644") return;
-        let id = prompt("વિનર ID (દા.ત. FT001):");
-        let winAmt = prompt("જીતેલી રકમ:");
-        if(id && winAmt) {
-            db.ref('players/' + id).child('deposit').transaction(current => (current || 0) + parseInt(winAmt));
-        }
-    }
-
-    function closeModal() { 
-        document.getElementById('depositModal').style.display = 'none'; 
-        document.getElementById('inputArea').style.display = 'none';
-        document.getElementById('amtInput').value = '';
-    }
-
-    // --- PWA INSTALL LOGIC ---
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installApp').style.display = 'block';
-    });
-
-    document.getElementById('installApp').addEventListener('click', async () => {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') document.getElementById('installApp').style.display = 'none';
-            deferredPrompt = null;
-        }
-    });
 </script>
+
 </body>
 </html>
