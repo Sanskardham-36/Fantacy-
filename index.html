@@ -3,293 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fantacy Tebal Pro</title>
+    <title>IPL MASTER LEDGER - JATIN SOLANKI</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --blue: #1e40af; --text: #334155; --bg: #ffffff; --green: #10b981; --red: #ef4444; --light-bg: #f8fafc; }
+        :root { --primary: #1e40af; --accent: #facc15; --bg: #ffffff; --card: #f8fafc; --text: #1e293b; --green: #22c55e; --red: #ef4444; }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: var(--text); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { background: var(--bg); margin: 0; color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        /* 1. Login Page */
-        #loginPage { position: fixed; inset: 0; background: white; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 60px 20px; z-index: 5000; text-align: center; }
-        .login-box { width: 100%; max-width: 320px; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 16px; outline: none; transition: border 0.3s; }
-        input:focus { border-color: var(--blue); }
-        .btn-main { background: var(--blue); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: opacity 0.2s; }
-        .btn-main:active { opacity: 0.8; }
+        /* Glowing Smart Header */
+        .header { background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; padding: 25px 20px; text-align: center; border-radius: 0 0 25px 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .match-title { font-size: 22px; font-weight: 900; margin: 10px 0; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 10px rgba(250, 204, 21, 0.5); animation: glow 2s infinite ease-in-out; }
+        @keyframes glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .match-info { font-size: 12px; opacity: 0.9; font-weight: 600; letter-spacing: 0.5px; }
 
-        /* 2. Header & Match Info */
-        .header { background: var(--light-bg); padding: 25px 15px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-        .match-glow { color: var(--blue); font-size: 22px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 12px rgba(30, 64, 175, 0.4); animation: glowEffect 2s infinite ease-in-out; }
-        @keyframes glowEffect { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(0.98); } }
-        .date-text { font-size: 12px; color: #64748b; margin-top: 6px; font-weight: 500; }
+        /* Admin Dashboard Stats */
+        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; margin-top: -15px; }
+        .stat-card { background: white; padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .stat-card span { display: block; font-size: 10px; color: #64748b; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-card b { font-size: 18px; color: var(--primary); }
 
-        /* 3. Search & List Area */
-        .search-container { padding: 12px 15px; background: white; border-bottom: 1px solid #f1f5f9; }
-        .main-scroll { flex: 1; overflow-y: auto; padding: 10px; background: white; }
-        table { width: 100%; border-collapse: collapse; }
-        th { font-size: 11px; color: #94a3b8; padding: 12px 8px; border-bottom: 2px solid #f1f5f9; text-transform: uppercase; text-align: center; }
-        td { padding: 16px 8px; text-align: center; border-bottom: 1px solid #f8fafc; font-size: 14px; }
-        .player-name { text-align: left; font-weight: 700; color: #1e293b; cursor: pointer; }
-        .player-id { font-size: 11px; color: #94a3b8; font-weight: 400; }
+        /* Player List Area */
+        .list-container { flex: 1; overflow-y: auto; padding: 10px 15px; }
+        .player-row { background: white; margin-bottom: 10px; padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f1f5f9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .p-details b { font-size: 16px; color: #0f172a; display: block; }
+        .p-details span { font-size: 12px; color: #94a3b8; }
+        
+        .p-result { text-align: right; }
+        .res-val { font-weight: 900; font-size: 16px; margin-bottom: 5px; }
+        .plus { color: var(--green); }
+        .minus { color: var(--red); }
 
-        /* 4. Action Buttons */
-        .btn-dep { background: #eff6ff; color: var(--blue); border: 1.5px solid #dbeafe; padding: 8px 12px; border-radius: 10px; font-weight: 800; min-width: 65px; }
-        .btn-out { background: #fff1f2; color: var(--red); border: 1.5px solid #ffe4e6; padding: 8px 12px; border-radius: 10px; font-weight: 800; margin-left: 6px; }
+        /* Smart Action Buttons */
+        .btn-win { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; }
+        .btn-add { background: var(--primary); color: white; border: none; width: 45px; height: 45px; border-radius: 12px; font-size: 24px; cursor: pointer; }
 
-        /* 5. Custom Modal (No Browser Popups) */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 4000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-card { background: white; width: 88%; max-width: 350px; padding: 25px; border-radius: 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        .modal-title { font-size: 18px; font-weight: 800; color: var(--blue); margin-bottom: 15px; }
-        .history-box { background: #f8fafc; border-radius: 12px; padding: 10px; margin-bottom: 15px; font-size: 12px; text-align: left; border: 1px solid #e2e8f0; }
+        /* Custom Modal (No Popups) */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-box { background: white; width: 85%; max-width: 340px; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        input { width: 100%; padding: 14px; margin: 12px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--primary); }
+        .btn-save { background: var(--green); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; }
 
-        /* 6. Admin Panel */
-        #adminPanel { display: none; margin-top: 25px; padding: 15px; border: 2px dashed #cbd5e1; border-radius: 20px; background: #fafafa; }
-        .req-card { background: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--blue); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        /* Login Screen */
+        #loginPage { position: fixed; inset: 0; background: white; z-index: 6000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
 
-        /* 7. Toast Notification */
-        #toast { display: none; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 50px; font-size: 14px; z-index: 6000; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
-
-        footer { padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; background: white; border-top: 1px solid #f1f5f9; }
-        b.brand { color: var(--blue); }
+        footer { padding: 15px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #f1f5f9; }
     </style>
 </head>
 <body>
 
     <div id="loginPage">
-        <div class="login-box">
-            <h1 style="color:var(--blue); font-size: 32px; margin-bottom: 5px;">FANTACY TEBAL</h1>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 30px;">Professional Digital Ledger</p>
-            <input type="password" id="passInp" placeholder="Password (Empty for Player)">
-            <button class="btn-main" onclick="startApp()">LOGIN</button>
-        </div>
-        <div style="font-size: 12px; color: #64748b;">Developed By<br><b class="brand">Jatin Solanki By Version</b></div>
+        <div style="font-size: 50px; margin-bottom: 10px;">🏏</div>
+        <h1 style="color:var(--primary); margin:0;">IPL LEDGER</h1>
+        <p style="color:#64748b; font-size: 13px; margin-bottom: 30px;">Professional Admin Panel</p>
+        <input type="password" id="adminPin" placeholder="Admin PIN (Blank for Player)">
+        <button class="btn-save" style="background:var(--primary)" onclick="checkLogin()">LOG IN</button>
+        <footer style="margin-top: 50px;">Developed By <b style="color:var(--primary)">Jatin Solanki By Version</b></footer>
     </div>
 
     <div id="app" style="display:none; flex-direction:column; height:100vh;">
         <div class="header">
-            <div id="matchDisplay" class="match-glow">LOADING MATCH...</div>
-            <div id="dateDisplay" class="date-text"></div>
+            <div class="match-info" id="currentDate">DATE: --/--/----</div>
+            <div class="match-title" id="matchLabel">IPL 2024</div>
+            <div class="match-info">My11Circle • 100 Entry • 50 Cut</div>
         </div>
 
-        <div class="search-container">
-            <input type="text" id="searchBar" placeholder="Search Player Name or ID..." onkeyup="searchPlayers()" style="margin:0;">
-        </div>
-
-        <div class="main-scroll">
-            <table>
-                <thead>
-                    <tr><th>No.</th><th style="text-align:left">Player</th><th>Actions</th></tr>
-                </thead>
-                <tbody id="pTable"></tbody>
-            </table>
-
-            <div id="adminPanel">
-                <h3 style="margin:0 0 15px; font-size:15px; color:var(--blue);">ADMIN DASHBOARD</h3>
-                <div id="reqList"></div>
-                
-                <div style="margin-top:20px; background:#fff; padding:15px; border-radius:15px; border:1px solid #eee;">
-                    <button class="btn-main" style="background:var(--red); margin-bottom:20px;" onclick="resetConfirmed()">RESET ALL TO 0</button>
-                    <input type="text" id="upMatch" placeholder="Match Name">
-                    <input type="text" id="upTime" placeholder="Match Time">
-                    <button class="btn-main" onclick="setMatch()">Update Match Info</button>
-                    <hr style="border:0.5px solid #eee; margin:20px 0;">
-                    <input type="text" id="addPName" placeholder="New Player Name">
-                    <input type="text" id="addPID" placeholder="New Player ID">
-                    <button class="btn-main" onclick="registerPlayer()">Add Player</button>
-                </div>
+        <div class="dashboard" id="adminDash" style="display:none;">
+            <div class="stat-card">
+                <span>Admin Profit (50/-)</span>
+                <b id="adminProfit">₹0</b>
+            </div>
+            <div class="stat-card">
+                <span>Total Turnover</span>
+                <b id="totalTurnover">₹0</b>
             </div>
         </div>
 
-        <footer>Developed By <b class="brand">Jatin Solanki By Version</b></footer>
+        <div class="list-container" id="playerList">
+            </div>
+
+        <div id="adminPanel" style="display:none; padding: 15px;">
+            <div style="border-top: 2px dashed #e2e8f0; padding-top: 15px;">
+                <input type="text" id="matchInput" placeholder="Update Match Name">
+                <button class="btn-save" style="background:var(--primary); padding:10px;" onclick="updateMatch()">Update Match</button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="text" id="playerNameInput" placeholder="New Player Name" style="margin:0">
+                    <button class="btn-add" onclick="addNewPlayer()">+</button>
+                </div>
+                <button onclick="resetData()" style="width:100%; background:none; border:none; color:var(--red); font-size:11px; margin-top:15px; font-weight:bold;">RESET ALL SEASON DATA</button>
+            </div>
+        </div>
+
+        <footer>Developed By <b>Jatin Solanki By Version</b></footer>
     </div>
 
-    <div id="modalBox" class="modal">
-        <div class="modal-card">
-            <div id="modalTitle" class="modal-title">Name</div>
-            
-            <div id="playerUI">
-                <input type="number" id="amtBox" placeholder="Enter Amount ₹" style="text-align:center; font-size:22px; font-weight:bold;">
-                <div id="payDetails" style="display:none; background:#eff6ff; padding:10px; border-radius:12px; font-size:12px; color:var(--blue); margin-bottom:15px; border:1px dashed var(--blue);">
-                    <b>Sakariya Vipul</b><br>UPI: vipulsakariya989-4@oksbi<br>Mob: 90239 65553
-                </div>
-                <button class="btn-main" onclick="sendReq()">Submit Request</button>
-            </div>
-
-            <div id="adminUI" style="display:none;">
-                <div id="historyView" class="history-box"></div>
-                <input type="number" id="winBox" placeholder="Win Amount ₹" style="text-align:center; font-size:20px;">
-                <button class="btn-main" style="background:var(--green)" onclick="submitWin()">Add Winning</button>
-            </div>
-
-            <button onclick="hideModal()" style="background:none; border:none; color:#94a3b8; margin-top:20px; font-weight:700; font-size:14px;">CANCEL</button>
+    <div id="winModal" class="modal">
+        <div class="modal-box">
+            <h2 id="targetName" style="margin:0; color:var(--primary);"></h2>
+            <p style="color:#64748b; font-size:11px;">Logic: Entry ₹100 | Admin Cut ₹50</p>
+            <input type="number" id="winningAmount" placeholder="Winning Amount ₹" style="text-align:center; font-size:24px;">
+            <button class="btn-save" onclick="saveTransaction()">SAVE ENTRY</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:#94a3b8; margin-top:15px; font-weight:bold;">CANCEL</button>
         </div>
     </div>
 
-    <div id="toast">Message</div>
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfjRsS0vdY6slU3HxA3oj60Fz93VF0-74",
+            authDomain: "fantacy-ea756.firebaseapp.com",
+            projectId: "fantacy-ea756",
+            databaseURL: "https://fantacy-ea756-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-<script>
-    // 1. Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyBfjRsS0vdY6slU3HxA3oj60Fz93VF0-74",
-        authDomain: "fantacy-ea756.firebaseapp.com",
-        projectId: "fantacy-ea756",
-        databaseURL: "https://fantacy-ea756-default-rtdb.firebaseio.com/"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        let isAdmin = false, selectedPID = "";
 
-    let isAdmin = false, curID = "", curName = "", curMode = "";
+        function checkLogin() {
+            if(document.getElementById('adminPin').value === "556644") isAdmin = true;
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            if(isAdmin) {
+                document.getElementById('adminDash').style.display = 'grid';
+                document.getElementById('adminPanel').style.display = 'block';
+            }
+            document.getElementById('currentDate').innerText = "DATE: " + new Date().toLocaleDateString('en-GB');
+        }
 
-    // 2. Utility Functions
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg; t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 2500);
-    }
-
-    function startApp() {
-        const p = document.getElementById('passInp').value;
-        if(p === "556644") isAdmin = true;
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('app').style.display = 'flex';
-        if(isAdmin) document.getElementById('adminPanel').style.display = 'block';
-        showToast(isAdmin ? "Welcome Admin" : "Welcome Player");
-    }
-
-    // 3. Database Sync
-    db.ref('match').on('value', s => {
-        const m = s.val() || { name: 'NO MATCH', time: '' };
-        document.getElementById('matchDisplay').innerText = m.name + ' ' + m.time;
-        document.getElementById('dateDisplay').innerText = 'DATE: ' + new Date().toLocaleDateString('en-GB');
-    });
-
-    db.ref('players').on('value', s => {
-        let arr = s.val() ? Object.values(s.val()) : [];
-        arr.sort((a,b) => b.deposit - a.deposit);
-        const tbody = document.getElementById('pTable');
-        tbody.innerHTML = '';
-        arr.forEach((p, i) => {
-            tbody.innerHTML += `<tr class="p-row">
-                <td>${i+1}</td>
-                <td class="player-name" onclick="adminTouch('${p.id}', '${p.name}')">${p.name}<br><span class="player-id">ID: ${p.id}</span></td>
-                <td>
-                    <button class="btn-dep" onclick="playerAction('${p.id}', '${p.name}', 'Deposit')">₹${p.deposit}</button>
-                    <button class="btn-out" onclick="playerAction('${p.id}', '${p.name}', 'Withdraw')">OUT</button>
-                </td>
-            </tr>`;
+        // Live Sync: Match Name
+        db.ref('ipl_smart/match').on('value', s => {
+            const m = s.val() || {n: 'IPL SEASON'};
+            document.getElementById('matchLabel').innerText = m.n;
         });
-    });
 
-    db.ref('requests').on('value', s => {
-        const div = document.getElementById('reqList');
-        if(!isAdmin) return;
-        div.innerHTML = s.val() ? '<b>Requests:</b>' : '';
-        if(s.val()) Object.keys(s.val()).forEach(k => {
-            const r = s.val()[k];
-            div.innerHTML += `<div class="req-card">
-                <span style="font-size:13px; font-weight:600;">${r.name}<br><small style="color:var(--blue)">${r.type}: ₹${r.amount}</small></span>
-                <button onclick="approveReq('${k}', '${r.pId}', ${r.amount}, '${r.type}')" style="background:var(--green); color:white; border:none; padding:8px 15px; border-radius:10px; font-weight:bold;">OK</button>
-            </div>`;
+        // Live Sync: Player Data & Calculations
+        db.ref('ipl_smart/players').on('value', s => {
+            const data = s.val();
+            const list = document.getElementById('playerList');
+            list.innerHTML = '';
+            let totalProfit = 0, totalTurn = 0;
+
+            if(data) {
+                Object.keys(data).forEach(id => {
+                    const p = data[id];
+                    const net = (p.win || 0) - (p.play || 0);
+                    totalProfit += (p.cut || 0);
+                    totalTurn += (p.play || 0);
+
+                    list.innerHTML += `
+                    <div class="player-row">
+                        <div class="p-details">
+                            <b>${p.name}</b>
+                            <span>Played: ₹${p.play || 0}</span>
+                        </div>
+                        <div class="p-result">
+                            <div class="res-val ${net >= 0 ? 'plus' : 'minus'}">${net >= 0 ? '+' : ''}₹${net}</div>
+                            ${isAdmin ? `<button class="btn-win" onclick="openWinModal('${id}', '${p.name}')">ADD WIN</button>` : ''}
+                        </div>
+                    </div>`;
+                });
+            }
+            document.getElementById('adminProfit').innerText = '₹' + totalProfit;
+            document.getElementById('totalTurnover').innerText = '₹' + totalTurn;
         });
-    });
 
-    // 4. Player & Admin Logic
-    function playerAction(id, name, mode) {
-        curID = id; curName = name; curMode = mode;
-        document.getElementById('modalTitle').innerText = mode;
-        document.getElementById('payDetails').style.display = mode === 'Deposit' ? 'block' : 'none';
-        document.getElementById('playerUI').style.display = 'block';
-        document.getElementById('adminUI').style.display = 'none';
-        document.getElementById('modalBox').style.display = 'flex';
-    }
+        function openWinModal(id, name) {
+            selectedPID = id;
+            document.getElementById('targetName').innerText = name;
+            document.getElementById('winModal').style.display = 'flex';
+        }
 
-    function adminTouch(id, name) {
-        if(!isAdmin) return;
-        curID = id; curName = name;
-        document.getElementById('modalTitle').innerText = name + " Info";
-        document.getElementById('playerUI').style.display = 'none';
-        document.getElementById('adminUI').style.display = 'block';
-        
-        const hView = document.getElementById('historyView');
-        hView.innerHTML = 'Loading History...';
-        db.ref('players/'+id+'/history').limitToLast(3).once('value', s => {
-            hView.innerHTML = '';
-            if(!s.val()) hView.innerHTML = 'No recent history';
-            s.forEach(c => { 
-                const item = c.val();
-                hView.innerHTML = `• ${item.note}: ₹${item.amt}<br>` + hView.innerHTML;
+        function saveTransaction() {
+            const winVal = parseInt(document.getElementById('winningAmount').value) || 0;
+            // The Logic: 100rs Play Entry, 50rs Admin Cut
+            db.ref('ipl_smart/players/' + selectedPID).transaction(p => {
+                if(p) {
+                    p.play = (p.play || 0) + 100;
+                    p.win = (p.win || 0) + winVal;
+                    p.cut = (p.cut || 0) + 50;
+                }
+                return p;
             });
-        });
-        document.getElementById('modalBox').style.display = 'flex';
-    }
+            closeModal();
+        }
 
-    function sendReq() {
-        const amt = parseInt(document.getElementById('amtBox').value);
-        if(!amt) return;
-        db.ref('requests').push({ pId: curID, name: curName, amount: amt, type: curMode });
-        showToast("Request Sent Successfully!");
-        hideModal();
-    }
+        function addNewPlayer() {
+            const name = document.getElementById('playerNameInput').value;
+            if(name) {
+                db.ref('ipl_smart/players/' + Date.now()).set({name: name, play: 0, win: 0, cut: 0});
+                document.getElementById('playerNameInput').value = '';
+            }
+        }
 
-    function submitWin() {
-        const amt = parseInt(document.getElementById('winBox').value);
-        if(!amt) return;
-        updateBalance(curID, amt, "Match Win");
-        showToast("Winning Amount Added!");
-        hideModal();
-    }
+        function updateMatch() {
+            const m = document.getElementById('matchInput').value;
+            if(m) db.ref('ipl_smart/match').set({n: m});
+        }
 
-    function approveReq(key, id, amt, type) {
-        if(!confirm("Approve ₹" + amt + " for " + type + "?")) return;
-        const finalAmt = type === 'Withdraw' ? -amt : amt;
-        updateBalance(id, finalAmt, type);
-        db.ref('requests/'+key).remove();
-        showToast("Approved!");
-    }
-
-    function updateBalance(id, amt, note) {
-        db.ref('players/'+id).child('deposit').transaction(c => (c||0) + amt);
-        db.ref('players/'+id+'/history').push({ amt: amt, note: note });
-    }
-
-    function resetConfirmed() {
-        if(!confirm("Are you sure? This will set all player balances to 0!")) return;
-        db.ref('players').once('value', s => {
-            s.forEach(p => {
-                db.ref('players/'+p.key).update({ deposit: 0 });
-                db.ref('players/'+p.key+'/history').remove();
-            });
-        });
-        showToast("All Balances Reset!");
-    }
-
-    function searchPlayers() {
-        const q = document.getElementById('searchBar').value.toLowerCase();
-        document.querySelectorAll('.p-row').forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
-        });
-    }
-
-    function hideModal() { 
-        document.getElementById('modalBox').style.display = 'none'; 
-        document.getElementById('amtBox').value = ''; 
-        document.getElementById('winBox').value = ''; 
-    }
-
-    function setMatch() {
-        const n = document.getElementById('upMatch').value, t = document.getElementById('upTime').value;
-        if(n) { db.ref('match').set({ name: n, time: t }); showToast("Match Updated!"); }
-    }
-
-    function registerPlayer() {
-        const n = document.getElementById('addPName').value, i = document.getElementById('addPID').value;
-        if(n && i) { db.ref('players/'+i).set({ name: n, id: i, deposit: 0 }); showToast("New Player Registered!"); }
-    }
-</script>
+        function closeModal() { document.getElementById('winModal').style.display = 'none'; document.getElementById('winningAmount').value = ''; }
+        function resetData() { if(confirm("Are you sure? This will delete all IPL history!")) db.ref('ipl_smart/players').remove(); }
+    </script>
 </body>
 </html>
