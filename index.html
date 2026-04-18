@@ -1,86 +1,111 @@
 <!DOCTYPE html>
-<html lang="gu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fantacy Tebal - Jatin Solanki</title>
+    <title>Fantacy Tebal</title>
     
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIkZhbnRhY3kgVGViYWwiLAogICJzaG9ydF9uYW1lIjogIkZhbnRhY3kiLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMxZTI5M2IiLAogICJ0aGVtZV9jb2xvciI6ICIjMWUyOTNiIgp9">
+
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #1e40af; --accent: #f59e0b; --bg: #f1f5f9; }
-        body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
+        :root { --main: #1e293b; --accent: #38bdf8; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; color: #334155; }
+
+        /* Login Screen */
+        #loginPage { position: fixed; inset: 0; background: radial-gradient(circle, #1e293b, #0f172a); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 40px 20px; z-index: 1000; text-align: center; }
+        .glow-text { color: var(--accent); font-size: 28px; font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); }
+        .login-box { width: 100%; max-width: 320px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #cbd5e1; outline: none; box-sizing: border-box; }
+        .btn-login { background: var(--accent); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(56,189,248,0.3); }
+
+        /* App Content */
+        #appContent { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
+        .header { background: var(--main); color: white; padding: 15px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        .match-glow { font-size: 18px; font-weight: 800; color: #fbbf24; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; text-shadow: 0 0 5px #fbbf24; } 50% { opacity: 0.7; } }
+
+        .main-scroll { flex: 1; overflow-y: auto; padding: 15px; }
+        .card { background: white; border-radius: 15px; padding: 12px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
-        .header { background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
-        .header h1 { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 1px; }
-
-        .main-content { flex: 1; overflow-y: auto; padding: 15px; }
-        .card { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 12px; margin-bottom: 15px; }
-
         table { width: 100%; border-collapse: collapse; }
-        th { color: #64748b; font-size: 11px; padding: 12px 5px; border-bottom: 2px solid #f1f5f9; text-transform: uppercase; }
-        td { padding: 15px 5px; text-align: center; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+        th { font-size: 11px; text-transform: uppercase; color: #94a3b8; padding: 10px 5px; border-bottom: 1px solid #f1f5f9; }
+        td { padding: 12px 5px; text-align: center; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+        .name-cell { text-align: left; font-weight: 600; color: var(--main); cursor: pointer; }
         
-        .dep-btn { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        
-        input { width: 90%; padding: 12px; margin: 10px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; outline: none; }
-        .btn-action { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; background: #1e40af; color: white; }
-        
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
-        .modal-content { background:white; padding:20px; border-radius:24px; width:85%; max-width:340px; text-align:center; }
-        
-        #adminArea { display: none; background: #fffbeb; border: 1px solid #fef3c7; }
-        .req-card { background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #10b981; }
+        .dep-btn { background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 8px; font-weight: 800; }
 
-        footer { padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; }
-        footer b { color: #1e40af; }
+        /* Admin Controls */
+        #adminArea { display: none; background: #fffbeb; border: 1px dashed #f59e0b; }
+        .req-card { background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #10b981; font-size: 13px; }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1001; align-items: center; justify-content: center; }
+        .modal-content { background: white; width: 85%; max-width: 350px; padding: 20px; border-radius: 20px; text-align: center; }
+        
+        footer { padding: 15px; text-align: center; font-size: 12px; color: #94a3b8; }
+        footer b { color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>FANTACY TEBAL</h1>
-        <p style="margin-top:5px; font-size:11px; opacity:0.9;">Real-time Ledger System</p>
+    <div id="loginPage">
+        <div class="glow-text">FANTACY TEBAL</div>
+        <div class="login-box">
+            <input type="password" id="passInp" placeholder="Enter Password (Keep empty for Player)">
+            <button class="btn-login" onclick="doLogin()">LOGIN</button>
+        </div>
+        <div style="color: #64748b; font-size: 12px;">Developed By <br><b>Jatin Solanki By Version</b></div>
     </div>
 
-    <div class="main-content">
-        <div class="card">
-            <h4 style="margin: 0 0 10px; text-align: center; color: #475569;">પ્લેયર્સ લિસ્ટ</h4>
-            <table>
-                <thead>
-                    <tr><th>ક્રમ</th><th>પ્લેયર</th><th>ડિપોઝિટ</th></tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+    <div id="appContent">
+        <div class="header">
+            <div id="matchDisplay" class="match-glow">LOADING MATCH...</div>
+            <div id="dateDisplay" style="font-size: 11px; margin-top: 4px; opacity: 0.8;">Date: --/--/----</div>
         </div>
 
-        <div id="adminArea" class="card">
-            <h3 style="color: #b45309; font-size: 16px; margin-top: 0; text-align: center;">🔒 એડમિન કંટ્રોલ</h3>
-            <div id="reqList"></div>
-            <hr style="border: 0.5px solid #fde68a; margin: 15px 0;">
-            <input type="text" id="pName" placeholder="નવું નામ">
-            <input type="text" id="pID" placeholder="નવો ID">
-            <button class="btn-action" onclick="addPlayer()">પ્લેયર ઉમેરો</button>
-            <button class="btn-action" style="background:#f59e0b; margin-top:10px;" onclick="setWinner()">🏆 વિનર એન્ટ્રી</button>
+        <div class="main-scroll">
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr><th>No.</th><th style="text-align:left;">Player</th><th>Deposit</th></tr>
+                    </thead>
+                    <tbody id="pTable"></tbody>
+                </table>
+            </div>
+
+            <div id="adminArea" class="card">
+                <h4 style="margin:0 0 10px; color: #b45309;">🔒 ADMIN PANEL</h4>
+                <div id="reqList"></div>
+                <hr style="border:0.5px solid #fde68a; margin:15px 0;">
+                <input type="text" id="mName" placeholder="Update Match Name">
+                <input type="text" id="mTime" placeholder="Update Match Time">
+                <button class="btn-login" style="margin-bottom:10px" onclick="updateMatch()">Update Header</button>
+                <input type="text" id="newName" placeholder="Player Name">
+                <input type="text" id="newID" placeholder="Player ID">
+                <button class="btn-login" onclick="addNewPlayer()">Add New Player</button>
+            </div>
         </div>
 
-        <div onclick="adminLogin()" style="height: 50px; width: 100%; cursor: pointer;"></div>
+        <footer>Developed By <b>Jatin Solanki By Version</b></footer>
     </div>
-
-    <footer>Developed By <b>Jatin Solanki</b></footer>
 
     <div id="depModal" class="modal">
         <div class="modal-content">
-            <h3 id="mPlayerName" style="color:#1e40af; margin-top:0;">ડિપોઝિટ</h3>
-            <div style="background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #3b82f6; text-align: left;">
-                <p style="margin:2px 0; font-weight:bold; font-size:14px;">Sakariya Vipul</p>
-                <p style="margin:2px 0; color:#2563eb; font-size:12px;"><b>UPI:</b> vipulsakariya989-4@oksbi</p>
-                <p style="margin:2px 0; color:#475569; font-size:12px;"><b>Mob:</b> +91 90239 65553</p>
+            <h3 id="modalUser" style="margin-top:0">Deposit</h3>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <button class="btn-login" style="background:#0ea5e9" onclick="setMode('Online')">Online</button>
+                <button class="btn-login" style="background:#64748b" onclick="setMode('Cash')">Cash</button>
             </div>
-            <input type="number" id="amtInp" placeholder="રકમ લખો ₹" style="text-align: center; font-size: 18px;">
-            <button class="btn-action" onclick="sendReq()">વિગત મોકલો</button>
-            <button onclick="closeModal()" style="background:none; border:none; color:gray; margin-top:15px;">રદ કરો</button>
+            <div id="qrBox" style="background:#f1f5f9; padding:10px; border-radius:10px; font-size:12px; text-align:left; margin-bottom:10px;">
+                <b>Receiver:</b> Sakariya Vipul<br>
+                <b>UPI:</b> vipulsakariya989-4@oksbi<br>
+                <b>Mobile:</b> +91 90239 65553
+            </div>
+            <input type="number" id="amtInp" placeholder="Enter Amount ₹" style="text-align:center">
+            <button class="btn-login" onclick="submitRequest()">Submit Request</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:gray; margin-top:15px;">Cancel</button>
         </div>
     </div>
 
@@ -93,80 +118,88 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let curID = "";
-    let isAdminMode = false;
+    
+    let isAdmin = false, curID = "", payMode = "Online";
 
-    db.ref('players').on('value', (snap) => {
-        const data = snap.val();
+    function doLogin() {
+        const p = document.getElementById('passInp').value;
+        if(p === "556644") isAdmin = true;
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appContent').style.display = 'flex';
+        if(isAdmin) document.getElementById('adminArea').style.display = 'block';
+    }
+
+    // Load Data
+    db.ref('match').on('value', s => {
+        const d = s.val() || { name: 'No Match Today', time: '' };
+        document.getElementById('matchDisplay').innerText = d.name + ' ' + d.time;
+        document.getElementById('dateDisplay').innerText = 'Date: ' + new Date().toLocaleDateString();
+    });
+
+    db.ref('players').on('value', s => {
+        const data = s.val();
         let arr = data ? Object.values(data) : [];
-        arr.sort((a, b) => b.deposit - a.deposit);
-        const tbody = document.getElementById('tableBody');
+        arr.sort((a,b) => b.deposit - a.deposit);
+        const tbody = document.getElementById('pTable');
         tbody.innerHTML = '';
-        arr.forEach((p, index) => {
+        arr.forEach((p, i) => {
             tbody.innerHTML += `<tr>
-                <td>${index + 1}</td>
-                <td style="text-align:left; padding-left:10px;"><b>${p.name}</b><br><small style="color:gray;">ID: ${p.id}</small></td>
+                <td>${i+1}</td>
+                <td class="name-cell" onclick="adminWinner('${p.id}')">${p.name}</td>
                 <td><button class="dep-btn" onclick="openDep('${p.id}', '${p.name}')">₹${p.deposit}</button></td>
             </tr>`;
         });
     });
 
-    db.ref('requests').on('value', (snap) => {
+    db.ref('requests').on('value', s => {
         const div = document.getElementById('reqList');
-        if(!isAdminMode) return;
-        div.innerHTML = '<b>નવી રિક્વેસ્ટ:</b>';
-        const data = snap.val();
+        if(!isAdmin) return;
+        div.innerHTML = '';
+        const data = s.val();
         if(data) {
             Object.keys(data).forEach(k => {
-                let r = data[k];
+                const r = data[k];
                 div.innerHTML += `<div class="req-card">
-                    <span>${r.name}: <b>₹${r.amount}</b></span>
-                    <button onclick="approve('${k}', '${r.pId}', ${r.amount})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold;">OK</button>
+                    <span>${r.name} (${r.mode}): ₹${r.amount}</span>
+                    <button onclick="approve('${k}', '${r.pId}', ${r.amount})" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:6px;">OK</button>
                 </div>`;
             });
         }
     });
 
     function openDep(id, name) {
-        curID = id;
-        document.getElementById('mPlayerName').innerText = name;
+        curID = id; document.getElementById('modalUser').innerText = name;
         document.getElementById('depModal').style.display = 'flex';
     }
-
     function closeModal() { document.getElementById('depModal').style.display = 'none'; }
+    function setMode(m) { payMode = m; document.getElementById('qrBox').style.display = m === 'Online' ? 'block' : 'none'; }
 
-    function sendReq() {
-        let val = document.getElementById('amtInp').value;
-        if(!val) return;
-        db.ref('requests').push({ pId: curID, name: document.getElementById('mPlayerName').innerText, amount: parseInt(val) });
-        alert("વિગત મોકલાઈ ગઈ!");
-        closeModal();
+    function submitRequest() {
+        const a = document.getElementById('amtInp').value;
+        if(!a) return;
+        db.ref('requests').push({ pId: curID, name: document.getElementById('modalUser').innerText, amount: parseInt(a), mode: payMode });
+        alert("Request Sent!"); closeModal();
     }
 
-    function adminLogin() {
-        if(prompt("પાસવર્ડ:") === "556644") {
-            isAdminMode = true;
-            document.getElementById('adminArea').style.display = 'block';
-            db.ref('requests').get().then(() => {}); 
-        }
+    function approve(k, id, a) {
+        db.ref('players/' + id).child('deposit').transaction(c => (c || 0) + a);
+        db.ref('requests/' + k).remove();
     }
 
-    function approve(key, id, amt) {
-        db.ref('players/' + id).child('deposit').transaction(c => (c || 0) + amt);
-        db.ref('requests/' + key).remove();
+    function addNewPlayer() {
+        const n = document.getElementById('newName').value, i = document.getElementById('newID').value;
+        if(n && i) db.ref('players/' + i).set({ name: n, id: i, deposit: 0 });
     }
 
-    function addPlayer() {
-        let n = document.getElementById('pName').value, i = document.getElementById('pID').value;
-        if(n && i) {
-            db.ref('players/' + i).set({ name: n, id: i, deposit: 0 });
-            document.getElementById('pName').value = ''; document.getElementById('pID').value = '';
-        }
+    function updateMatch() {
+        const n = document.getElementById('mName').value, t = document.getElementById('mTime').value;
+        db.ref('match').set({ name: n, time: t });
     }
 
-    function setWinner() {
-        let i = prompt("ID:"), a = prompt("રકમ:");
-        if(i && a) db.ref('players/' + i).child('deposit').transaction(c => (c || 0) + parseInt(a));
+    function adminWinner(id) {
+        if(!isAdmin) return;
+        const amt = prompt("Enter Win Amount for this player:");
+        if(amt) db.ref('players/' + id).child('deposit').transaction(c => (c || 0) + parseInt(amt));
     }
 </script>
 </body>
