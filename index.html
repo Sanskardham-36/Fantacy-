@@ -9,133 +9,93 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #1e40af; --accent: #f59e0b; --bg: #f8fafc; }
+        :root { --primary: #1e40af; --accent: #f59e0b; --bg: #f1f5f9; }
         body { font-family: sans-serif; background-color: var(--bg); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
         
-        /* 1. Login Screen */
-        #loginPage { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e40af, #3b82f6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        
-        /* 2. Main App Content (Hidden initially) */
-        #appContent { display: none; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        .header { background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        .header { background: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%); color: white; padding: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+
         .main-content { flex: 1; overflow-y: auto; padding: 15px; }
         .card { background: white; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 12px; margin-bottom: 15px; }
 
-        /* Table Style */
         table { width: 100%; border-collapse: collapse; }
         th { color: #64748b; font-size: 11px; padding: 12px 5px; border-bottom: 2px solid #f1f5f9; text-transform: uppercase; }
         td { padding: 15px 5px; text-align: center; border-bottom: 1px solid #f8fafc; font-size: 14px; }
         
         .dep-btn { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; padding: 8px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
         
-        /* Modal & UI Elements */
-        input { width: 90%; padding: 12px; margin: 10px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; outline: none; font-size: 14px; }
-        .btn-action { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; background: #1e40af; color: white; font-size: 15px; }
+        input { width: 90%; padding: 12px; margin: 10px 0; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; outline: none; }
+        .btn-action { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; background: #1e40af; color: white; }
         
         .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:999; align-items:center; justify-content:center; }
         .modal-content { background:white; padding:20px; border-radius:24px; width:85%; max-width:340px; text-align:center; }
         
-        .upi-box { background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #3b82f6; text-align: left; }
-        
-        /* Admin Section */
-        .admin-section { margin-top: 10px; border-top: 2px solid #eee; padding-top: 15px; }
-        .req-card { background:#f0f9ff; padding:10px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border-left: 4px solid #3b82f6; }
+        #adminArea { display: none; background: #fffbeb; border: 1px solid #fef3c7; }
+        .req-card { background: white; padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #10b981; }
 
-        footer { padding: 15px; text-align: center; font-size: 12px; color: #64748b; background: white; border-top: 1px solid #f1f5f9; }
+        footer { padding: 20px; text-align: center; font-size: 12px; color: #94a3b8; }
         footer b { color: #1e40af; }
     </style>
 </head>
 <body>
 
-    <div id="loginPage">
-        <div class="login-card">
-            <h1 style="color: #1e40af; margin: 0 0 10px; font-size: 24px;">FANTACY TEBAL</h1>
-            <p style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Secure Admin Access</p>
-            <input type="password" id="loginPass" placeholder="પાસવર્ડ નાખો" style="text-align: center; font-size: 18px; letter-spacing: 5px;">
-            <button class="btn-action" onclick="checkLogin()">LOGIN</button>
-            <p style="font-size: 10px; color: #94a3b8; margin-top: 25px;">Developed By Jatin Solanki</p>
-        </div>
+    <div class="header">
+        <h1>FANTACY TEBAL</h1>
+        <p style="margin-top:5px; font-size:11px; opacity:0.9;">Real-time Ledger System</p>
     </div>
 
-    <div id="appContent">
-        <div class="header">
-            <h1>FANTACY TEBAL</h1>
-            <p>Real-time Ledger System</p>
+    <div class="main-content">
+        <div class="card">
+            <h4 style="margin: 0 0 10px; text-align: center; color: #475569;">પ્લેયર્સ લિસ્ટ</h4>
+            <table>
+                <thead>
+                    <tr><th>ક્રમ</th><th>પ્લેયર</th><th>ડિપોઝિટ</th></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
         </div>
 
-        <div class="main-content">
-            <div class="card">
-                <h4 style="margin: 0 0 10px; font-size: 14px; text-align: center; color: #475569;">પ્લેયર્સ ડિપોઝિટ લિસ્ટ</h4>
-                <table>
-                    <thead>
-                        <tr><th>ક્રમ</th><th>પ્લેયર</th><th>ડિપોઝિટ</th></tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
-            </div>
-
-            <div class="card">
-                <h3 style="color: #1e40af; font-size: 16px; margin-top: 0;">🔒 એડમિન કંટ્રોલ</h3>
-                
-                <div id="reqList"></div>
-                
-                <hr style="border: 0.5px solid #eee; margin: 15px 0;">
-                
-                <input type="text" id="pName" placeholder="પ્લેયરનું આખું નામ">
-                <input type="text" id="pID" placeholder="પ્લેયર ID (Unique)">
-                <button class="btn-action" onclick="addPlayer()">પ્લેયર ઉમેરો</button>
-                
-                <button class="btn-action" style="background:#f59e0b; margin-top:10px;" onclick="setWinner()">🏆 વિનર એન્ટ્રી</button>
-            </div>
+        <div id="adminArea" class="card">
+            <h3 style="color: #b45309; font-size: 16px; margin-top: 0; text-align: center;">🔒 એડમિન કંટ્રોલ</h3>
+            <div id="reqList"></div>
+            <hr style="border: 0.5px solid #fde68a; margin: 15px 0;">
+            <input type="text" id="pName" placeholder="નવું નામ">
+            <input type="text" id="pID" placeholder="નવો ID">
+            <button class="btn-action" onclick="addPlayer()">પ્લેયર ઉમેરો</button>
+            <button class="btn-action" style="background:#f59e0b; margin-top:10px;" onclick="setWinner()">🏆 વિનર એન્ટ્રી</button>
         </div>
 
-        <footer>Jatin Solanki <b>By Version</b></footer>
+        <div onclick="adminLogin()" style="height: 50px; width: 100%; cursor: pointer;"></div>
     </div>
+
+    <footer>Developed By <b>Jatin Solanki</b></footer>
 
     <div id="depModal" class="modal">
         <div class="modal-content">
             <h3 id="mPlayerName" style="color:#1e40af; margin-top:0;">ડિપોઝિટ</h3>
-            <p style="font-size:11px; color:gray; margin-bottom:15px;">નીચેની વિગત પર પેમેન્ટ મોકલીને રકમ લખો</p>
-            
-            <div class="upi-box">
-                <p style="margin:2px 0; font-weight:bold; font-size:14px; color:#1e293b;">Sakariya Vipul</p>
+            <div style="background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px dashed #3b82f6; text-align: left;">
+                <p style="margin:2px 0; font-weight:bold; font-size:14px;">Sakariya Vipul</p>
                 <p style="margin:2px 0; color:#2563eb; font-size:12px;"><b>UPI:</b> vipulsakariya989-4@oksbi</p>
                 <p style="margin:2px 0; color:#475569; font-size:12px;"><b>Mob:</b> +91 90239 65553</p>
             </div>
-
-            <input type="number" id="amtInp" placeholder="રકમ લખો ₹" style="text-align: center; font-size: 18px; font-weight: bold;">
-            <button class="btn-action" onclick="sendReq()">પેમેન્ટની વિગત મોકલો</button>
-            <button onclick="closeModal()" style="background:none; border:none; color:gray; margin-top:15px; font-size:13px; cursor: pointer;">રદ કરો</button>
+            <input type="number" id="amtInp" placeholder="રકમ લખો ₹" style="text-align: center; font-size: 18px;">
+            <button class="btn-action" onclick="sendReq()">વિગત મોકલો</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:gray; margin-top:15px;">રદ કરો</button>
         </div>
     </div>
 
 <script>
-    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBfjRsS0vdY6slU3HxA3oj60Fz93VF0-74",
         authDomain: "fantacy-ea756.firebaseapp.com",
         projectId: "fantacy-ea756",
         databaseURL: "https://fantacy-ea756-default-rtdb.firebaseio.com/"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let curID = "";
+    let isAdminMode = false;
 
-    // ૧. લોગિન પ્રોસેસ
-    function checkLogin() {
-        const pass = document.getElementById('loginPass').value;
-        if(pass === "556644") {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('appContent').style.display = 'flex';
-        } else {
-            alert("ખોટો પાસવર્ડ! ફરી પ્રયાસ કરો.");
-        }
-    }
-
-    // ૨. પ્લેયર્સ ડેટા લોડ કરવો (Real-time)
     db.ref('players').on('value', (snap) => {
         const data = snap.val();
         let arr = data ? Object.values(data) : [];
@@ -151,46 +111,44 @@
         });
     });
 
-    // ૩. પેમેન્ટ રિક્વેસ્ટ (એડમિન માટે)
     db.ref('requests').on('value', (snap) => {
         const div = document.getElementById('reqList');
-        div.innerHTML = '';
+        if(!isAdminMode) return;
+        div.innerHTML = '<b>નવી રિક્વેસ્ટ:</b>';
         const data = snap.val();
-        if(!data) {
-            div.innerHTML = '<p style="font-size:12px; color:gray; text-align:center;">કોઈ નવી રિક્વેસ્ટ નથી.</p>';
-        } else {
+        if(data) {
             Object.keys(data).forEach(k => {
                 let r = data[k];
                 div.innerHTML += `<div class="req-card">
-                    <span style="font-size:13px; color:#1e3a8a;"><b>${r.name}</b>: ₹${r.amount}</span>
-                    <button onclick="approve('${k}', '${r.pId}', ${r.amount})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">OK</button>
+                    <span>${r.name}: <b>₹${r.amount}</b></span>
+                    <button onclick="approve('${k}', '${r.pId}', ${r.amount})" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold;">OK</button>
                 </div>`;
             });
         }
     });
 
-    // ૪. ડિપોઝિટ અને મોડલ ફંક્શન
     function openDep(id, name) {
         curID = id;
         document.getElementById('mPlayerName').innerText = name;
         document.getElementById('depModal').style.display = 'flex';
-        document.getElementById('amtInp').value = '';
     }
 
     function closeModal() { document.getElementById('depModal').style.display = 'none'; }
 
     function sendReq() {
         let val = document.getElementById('amtInp').value;
-        if(!val || val <= 0) { alert("રકમ લખો"); return; }
-        
-        db.ref('requests').push({
-            pId: curID,
-            name: document.getElementById('mPlayerName').innerText,
-            amount: parseInt(val)
-        });
-        
-        alert("રિક્વેસ્ટ મોકલાઈ ગઈ! એડમિન પેમેન્ટ ચેક કરીને જમા કરી દેશે.");
+        if(!val) return;
+        db.ref('requests').push({ pId: curID, name: document.getElementById('mPlayerName').innerText, amount: parseInt(val) });
+        alert("વિગત મોકલાઈ ગઈ!");
         closeModal();
+    }
+
+    function adminLogin() {
+        if(prompt("પાસવર્ડ:") === "556644") {
+            isAdminMode = true;
+            document.getElementById('adminArea').style.display = 'block';
+            db.ref('requests').get().then(() => {}); 
+        }
     }
 
     function approve(key, id, amt) {
@@ -198,27 +156,17 @@
         db.ref('requests/' + key).remove();
     }
 
-    // ૫. એડમિન ઓપરેશન્સ
     function addPlayer() {
-        let n = document.getElementById('pName').value;
-        let i = document.getElementById('pID').value;
+        let n = document.getElementById('pName').value, i = document.getElementById('pID').value;
         if(n && i) {
             db.ref('players/' + i).set({ name: n, id: i, deposit: 0 });
-            document.getElementById('pName').value = '';
-            document.getElementById('pID').value = '';
-            alert("પ્લેયર ઉમેરાઈ ગયો.");
-        } else {
-            alert("નામ અને ID બંને લખો.");
+            document.getElementById('pName').value = ''; document.getElementById('pID').value = '';
         }
     }
 
     function setWinner() {
-        let i = prompt("વિનર પ્લેયરનું ID નાખો:");
-        let a = prompt("જીતેલી રકમ નાખો (₹):");
-        if(i && a) {
-            db.ref('players/' + i).child('deposit').transaction(c => (c || 0) + parseInt(a));
-            alert("રકમ જમા થઈ ગઈ.");
-        }
+        let i = prompt("ID:"), a = prompt("રકમ:");
+        if(i && a) db.ref('players/' + i).child('deposit').transaction(c => (c || 0) + parseInt(a));
     }
 </script>
 </body>
